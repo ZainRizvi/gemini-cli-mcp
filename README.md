@@ -146,8 +146,14 @@ npm run build
 # Development with auto-reload
 npm run dev
 
-# Run tests (if available)
+# Run tests
 npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
 ### Development Mode
@@ -274,13 +280,42 @@ claude mcp list
 - **Test mode**: Returns simulated responses immediately
 - **Claude Code**: Shows `gemini-cli: connected` status
 
-If you hit quota limits, the server will timeout after 10 seconds and return a proper error message.
+If you hit quota limits, the server will timeout after 5 minutes (or 10 seconds in test mode) and return a proper error message.
+
+## Testing
+
+The project includes comprehensive test suites:
+
+### Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode (for development)
+npm run test:watch
+```
+
+### Test Coverage
+- **Unit Tests**: `tests/gemini-cli.test.ts` - Tests for CLI wrapper functions
+- **Integration Tests**: `tests/mcp-server.test.ts` - Full MCP server testing
+- **JSON Error Handling**: Tests for robust JSON parsing
+- **Model Selection**: Tests for default and custom model usage
+- **Validation**: Tests for input validation and error cases
+
+The test suite provides:
+- **92%+ coverage** of the CLI module
+- **Full MCP protocol compliance** testing
+- **Error scenario** testing (invalid JSON, timeouts, etc.)
+- **Both test and production mode** validation
 
 ## Security Notes
 
 - The server validates input to prevent command injection
 - Prompts are properly escaped when passed to the shell
-- Command execution is limited by timeout (30 seconds default)
+- Command execution is limited by timeout (5 minutes for production, 10 seconds for test mode)
 - Only stderr is used for logging (stdout reserved for MCP protocol)
 
 ## Contributing

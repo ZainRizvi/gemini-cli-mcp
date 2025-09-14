@@ -1,15 +1,12 @@
 import { spawn } from 'child_process';
 import { GeminiCliResult, GeminiError } from './types.js';
 
-const COMMAND_TIMEOUT_MS = 10000; // 10 seconds
+const COMMAND_TIMEOUT_MS = 300000; // 5 minutes for production
+const TEST_TIMEOUT_MS = 10000; // 10 seconds for test mode
 const TEST_MODE = process.env.GEMINI_TEST_MODE === 'true';
 
 export async function executeGeminiCommand(prompt: string, model?: string): Promise<GeminiCliResult> {
-  // Test mode - return simulated response
-  if (TEST_MODE) {
-    return simulateGeminiResponse(prompt, model);
-  }
-  if (!prompt || typeof prompt !== 'string') {
+  if (typeof prompt !== 'string') {
     throw new Error('Prompt is required and must be a string');
   }
 
@@ -20,6 +17,11 @@ export async function executeGeminiCommand(prompt: string, model?: string): Prom
   // Validate prompt length (reasonable limit)
   if (prompt.length > 10000) {
     throw new Error('Prompt is too long (max 10000 characters)');
+  }
+
+  // Test mode - return simulated response
+  if (TEST_MODE) {
+    return simulateGeminiResponse(prompt, model);
   }
 
   return new Promise((resolve) => {
@@ -39,6 +41,9 @@ export async function executeGeminiCommand(prompt: string, model?: string): Prom
     let stdout = '';
     let stderr = '';
 
+    // Use shorter timeout for test mode, longer for production
+    const timeoutMs = TEST_MODE ? TEST_TIMEOUT_MS : COMMAND_TIMEOUT_MS;
+
     // Set up timeout
     const timeoutId = setTimeout(() => {
       if (!isResolved) {
@@ -47,11 +52,11 @@ export async function executeGeminiCommand(prompt: string, model?: string): Prom
         resolve({
           success: false,
           output: '',
-          error: `Command timed out after ${COMMAND_TIMEOUT_MS / 1000} seconds`,
+          error: `Command timed out after ${timeoutMs / 1000} seconds`,
           exitCode: 124
         });
       }
-    }, COMMAND_TIMEOUT_MS);
+    }, timeoutMs);
 
     child.stdout?.on('data', (data) => {
       stdout += data.toString();
@@ -103,7 +108,8 @@ export async function executeGeminiCommand(prompt: string, model?: string): Prom
         if (geminiError.code === 'ENOENT') {
           errorMessage = 'Gemini CLI not found. Please ensure it is installed and in your PATH.';
         } else if (geminiError.code === 'ETIMEDOUT') {
-          errorMessage = `Command timed out after ${COMMAND_TIMEOUT_MS / 1000} seconds`;
+          const timeoutMs = TEST_MODE ? TEST_TIMEOUT_MS : COMMAND_TIMEOUT_MS;
+          errorMessage = `Command timed out after ${timeoutMs / 1000} seconds`;
         } else {
           errorMessage = `Command execution error: ${geminiError.message}`;
         }
@@ -127,7 +133,7 @@ export function sanitizePrompt(prompt: string): string {
     .trim();
 }
 
-async function simulateGeminiResponse(prompt: string, model?: string): Promise<GeminiCliResult> {
+export async function simulateGeminiResponse(prompt: string, model?: string): Promise<GeminiCliResult> {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
 
