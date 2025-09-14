@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server that integrates the local `gemini` CLI tool with Claude Code. This server acts as a bridge, allowing Claude Code to execute Gemini AI queries through the standardized MCP protocol.
 
+_Made 99% with Claude Code (including this line)._
+
 ## How It Works
 
 This MCP server provides a simple interface between Claude Code and the Gemini CLI tool:
