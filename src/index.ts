@@ -44,7 +44,7 @@ class GeminiMcpServer {
         tools: [
           {
             name: 'gemini_query',
-            description: 'Execute a query using the local Gemini CLI tool',
+            description: 'Execute a query using the local Gemini CLI tool. Best used for: 1) Detailed codebase analysis requiring deep understanding of multiple files and complex relationships, 2) Web searches for current documentation, API references, and coding best practices, 3) Getting a different AI perspective on complex technical problems, 4) Research tasks that benefit from Gemini\'s training data and capabilities. 5) Code reviews, to get a different perspective on potential issues and improvements.',
             inputSchema: {
               type: 'object',
               properties: {
